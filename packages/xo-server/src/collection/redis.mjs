@@ -179,7 +179,7 @@ export default class Redis extends Collection {
             }
           }
         }
-        const promises = [redis.del(key), redis.hSet(key, props)]
+        const promises = [redis.del(key), redis.set(key, JSON.stringify(props))]
 
         // Update indexes.
         forEach(indexes, index => {
@@ -204,12 +204,13 @@ export default class Redis extends Collection {
 
     let model
     try {
-      model = await redis.hGetAll(key)
+      model = await redis.get(key).then(JSON.parse)
     } catch (error) {
       if (!error.message.startsWith('WRONGTYPE')) {
         throw error
       }
-      model = await redis.get(key).then(JSON.parse)
+
+      model = await redis.hGetAll(key)
     }
 
     return model === null ? null : this._unserialize(model) ?? model
