@@ -34,6 +34,7 @@ export async function exportIncrementalVm(
     fullVdisRequired = new Set(),
 
     disableBaseTags = false,
+    nbdConcurrency = 1,
     preferNbd,
   } = {}
 ) {
@@ -83,6 +84,7 @@ export async function exportIncrementalVm(
       cancelToken,
       format: 'vhd',
       preferNbd,
+      nbdConcurrency,
     })
   })
 

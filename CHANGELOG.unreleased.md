@@ -8,6 +8,7 @@
 > Users must be able to say: “Nice enhancement, I'm eager to test it”
 
 - [Forget SR] Changed the modal message and added a confirmation text to be sure the action is understood by the user [#7148](https://github.com/vatesfr/xen-orchestra/issues/7148) (PR [#7155](https://github.com/vatesfr/xen-orchestra/pull/7155))
+- [Backup]Use multiple link to speedup NBD backup (PR [#7216](https://github.com/vatesfr/xen-orchestra/pull/7216))
 
 ### Bug fixes
 
@@ -34,4 +35,6 @@
 - @xen-orchestra/xapi minor
 - @vates/nbd-client minor
 - vhd-lib patch
+- xo-server minor
+- xo-web minor
 <!--packages-end-->
