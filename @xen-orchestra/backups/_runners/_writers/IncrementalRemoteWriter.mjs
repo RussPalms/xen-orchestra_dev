@@ -205,13 +205,14 @@ export class IncrementalRemoteWriter extends MixinRemoteWriter(AbstractIncrement
             await checkVhd(handler, parentPath)
           }
 
-          transferSize += await adapter.writeVhd(path, deltaExport.streams[`${id}.vhd`], {
+          const transferSizeOneDisk = await adapter.writeVhd(path, deltaExport.streams[`${id}.vhd`], {
             // no checksum for VHDs, because they will be invalidated by
             // merges and chainings
             checksum: false,
             validator: tmpPath => checkVhd(handler, tmpPath),
             writeBlockConcurrency: this._config.writeBlockConcurrency,
           })
+          transferSize += transferSizeOneDisk
 
           if (isDelta) {
             await chainVhd(handler, parentPath, handler, path)
