@@ -557,6 +557,13 @@ export async function cleanVm(
     if (mergedSize || (fixMetadata && fileSystemSize !== size)) {
       metadata.size = mergedSize ?? fileSystemSize ?? size
 
+      if (mergedSize) {
+        // all disks are now key disk
+        metadata.differentialVhds = {}
+        for (const id of Object.values(metadata.vdis)) {
+          metadata.differentialVhds[`${id}.vhd`] = false
+        }
+      }
       mustRegenerateCache = true
       try {
         await handler.writeFile(metadataPath, JSON.stringify(metadata), { flags: 'w' })
