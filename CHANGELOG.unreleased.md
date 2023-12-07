@@ -31,5 +31,7 @@
 
 <!--packages-start-->
 
+- @xen-orchestra/xapi minor
+- @vates/nbd-client minor
 - vhd-lib patch
 <!--packages-end-->
