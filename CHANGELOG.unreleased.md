@@ -11,6 +11,8 @@
 
 ### Bug fixes
 
+- [Backup] Reduce memory consumption when using NBD (PR [#7216](https://github.com/vatesfr/xen-orchestra/pull/7216))
+
 > Users must be able to say: “I had this issue, happy to know it's fixed”
 
 ### Packages to release
@@ -29,4 +31,5 @@
 
 <!--packages-start-->
 
+- vhd-lib patch
 <!--packages-end-->
