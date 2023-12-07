@@ -29,6 +29,7 @@
 
 <!--packages-start-->
 
+- vhd-lib minor
 - @xen-orchestra/backups patch
 
 <!--packages-end-->
