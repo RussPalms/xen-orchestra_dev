@@ -644,9 +644,11 @@ const xoItemToRender = {
   backup: backup => (
     <span>
       <span className='tag tag-info' style={{ textTransform: 'capitalize' }}>
-        {backup.mode}
+        {backup.mode === 'delta' ? _('backupIsIncremental') : backup.mode}
       </span>{' '}
       <span className='tag tag-warning'>{backup.remote.name}</span>{' '}
+      {backup.differential === true && <span className='tag tag-info'>{_('backupIsDifferencing')} </span>}
+      {backup.differential === false && <span className='tag tag-info'>{_('backupisKey')} </span>}
       {backup.size !== undefined && <span className='tag tag-info'>{formatSize(backup.size)}</span>}{' '}
       <FormattedDate
         value={new Date(backup.timestamp)}

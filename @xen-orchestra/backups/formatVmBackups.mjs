@@ -25,6 +25,9 @@ function formatVmBackup(backup) {
       name_description: backup.vm.name_description,
       name_label: backup.vm.name_label,
     },
+    // any backup with at least one differential disk is a delta
+    differential:
+      backup.differentialVhds === undefined ? undefined : Object.values(backup.differentialVhds).some(t => t),
   }
 }
 
