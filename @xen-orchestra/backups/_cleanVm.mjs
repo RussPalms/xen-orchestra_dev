@@ -471,16 +471,16 @@ export async function cleanVm(
   const metadataWithMergedVhd = {}
   const doMerge = async () => {
     await asyncMap(toMerge, async chain => {
-      const merged = await limitedMergeVhdChain(handler, chain, {
+      const mergedSize = await limitedMergeVhdChain(handler, chain, {
         logInfo,
         logWarn,
         remove,
         merge,
         mergeBlockConcurrency,
       })
-      if (merged !== undefined) {
+      if (mergedSize !== undefined) {
         const metadataPath = vhdsToJSons[chain[chain.length - 1]] // all the chain should have the same metada file
-        metadataWithMergedVhd[metadataPath] = true
+        metadataWithMergedVhd[metadataPath] = (metadataWithMergedVhd[metadataPath] ?? 0) + mergedSize
       }
     })
   }
@@ -509,12 +509,11 @@ export async function cleanVm(
 
   // update size for delta metadata with merged VHD
   // check for the other that the size is the same as the real file size
-
   await asyncMap(jsons, async metadataPath => {
     const metadata = backups.get(metadataPath)
 
     let fileSystemSize
-    const merged = metadataWithMergedVhd[metadataPath] !== undefined
+    const mergedSize = metadataWithMergedVhd[metadataPath]
 
     const { mode, size, vhds, xva } = metadata
 
@@ -528,22 +527,18 @@ export async function cleanVm(
           // can fail with encrypted remote
         }
       } else if (mode === 'delta') {
-        const linkedVhds = Object.keys(vhds).map(key => resolve('/', vmDir, vhds[key]))
-        fileSystemSize = await computeVhdsSize(handler, linkedVhds)
-
-        // the size is not computed in some cases (e.g. VhdDirectory)
-        if (fileSystemSize === undefined) {
-          return
-        }
-
         // don't warn if the size has changed after a merge
-        if (!merged && fileSystemSize !== size) {
-          // FIXME: figure out why it occurs so often and, once fixed, log the real problems with `logWarn`
-          console.warn('cleanVm: incorrect backup size in metadata', {
-            path: metadataPath,
-            actual: size ?? 'none',
-            expected: fileSystemSize,
-          })
+        if (mergedSize === undefined) {
+          const linkedVhds = Object.keys(vhds).map(key => resolve('/', vmDir, vhds[key]))
+          fileSystemSize = await computeVhdsSize(handler, linkedVhds)
+          // the size is not computed in some cases (e.g. VhdDirectory)
+          if (fileSystemSize !== undefined && fileSystemSize !== size) {
+            logWarn('cleanVm: incorrect backup size in metadata', {
+              path: metadataPath,
+              actual: size ?? 'none',
+              expected: fileSystemSize,
+            })
+          }
         }
       }
     } catch (error) {
@@ -551,9 +546,10 @@ export async function cleanVm(
       return
     }
 
-    // systematically update size after a merge
-    if ((merged || fixMetadata) && size !== fileSystemSize) {
-      metadata.size = fileSystemSize
+    // systematically update size and differentials after a merge
+    if (mergedSize || (fixMetadata && fileSystemSize !== size)) {
+      metadata.size = mergedSize ?? fileSystemSize ?? size
+
       mustRegenerateCache = true
       try {
         await handler.writeFile(metadataPath, JSON.stringify(metadata), { flags: 'w' })
